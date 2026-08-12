@@ -1,22 +1,37 @@
 from fastapi import FastAPI
 from calculator import calculate_one_rep_max, calculate_optimal_set
+import sqlite3
 
 app = FastAPI()
 
 
 @app.get("/")
 def read_root():
-    return {"message": "The API is alive!"}
+    return {"message": "Connected to API"}
 
 
 @app.get("/calculate-1rm")
 def get_one_rep_max(weight: float, reps: int):
     one_rep_max = calculate_one_rep_max(weight, reps)
 
+    connection = sqlite3.connect("workouts.db")
+    cursor = connection.cursor()
+
+    insert = """
+    INSERT INTO workout_history (weight, reps, one_rep_max)
+    VALUES (?, ?, ?)
+    """
+
+    cursor.execute(insert, (weight, reps, one_rep_max))
+
+    connection.commit()
+    connection.close()
+
     return {
         "weight_lifted": weight,
         "repetitions": reps,
-        "one_rep_max": one_rep_max
+        "one_rep_max": one_rep_max,
+        "status": "Saved Successfully"
     }
 
 
