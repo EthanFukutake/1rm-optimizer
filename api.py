@@ -44,3 +44,34 @@ def get_optimal_set(weight: float, reps: int, min_reps: int, max_reps: int, has_
         "best_weight": best_weight,
         "best_reps": best_reps
     }
+
+
+@app.get("/history")
+def get_workout_history():
+    connection = sqlite3.connect("Workouts.db")
+    cursor = connection.cursor()
+
+    select = """
+    SELECT id, weight, reps, one_rep_max, date_time
+    FROM workout_history
+    ORDER BY date_time DESC
+    """
+
+    cursor.execute(select)
+
+    rows = cursor.fetchall()
+
+    connection.close()
+
+    history_table = []
+    for row in rows:
+        history_table.append({
+            "id": row[0],
+            "weight": row[1],
+            "reps": row[2],
+            "one_rep_max": row[3],
+            "date": row[4]
+
+        })
+
+    return {"history": history_table}
