@@ -15,22 +15,34 @@ weight = st.number_input("Weight Lifted (lbs)",
 reps = st.number_input("Reps Performed", min_value=1,
                        max_value=20, value=1, step=1)
 
-if st.button("Calculate & Save"):
-    api_url = f"http://127.0.0.1:8000/calculate-1rm?exercise={exercise}&weight={weight}&reps={reps}"
+if st.button("Calculate"):
+    api_url = f"http://127.0.0.1:8000/calculate-1rm?weight={weight}&reps={reps}"
 
     try:
         response = requests.get(api_url)
         if response.status_code == 200:
             data = response.json()
 
-            st.success(
-                f"Your Estimated One Rep Max is {data['one_rep_max']:.2f} lbs")
-            st.info(data['status'])
+            st.session_state["calculated_1rm"] = data["one_rep_max"]
         else:
             st.error("An Error Occurred")
 
     except requests.exceptions.ConnectionError:
         st.error("An error occurred tring to connect to API")
+
+if "calculated_1rm" in st.session_state:
+    st.success(
+        f"Your Estimated One Rep Max is {st.session_state['calculated_1rm']:.2f} lbs")
+
+    if st.button("Save"):
+        save_url = f"http://127.0.0.1:8000/save-workout?exercise={exercise}&weight={weight}&reps={reps}&one_rep_max={st.session_state['calculated_1rm']}"
+
+        save_response = requests.get(save_url)
+
+        if save_response.status_code == 200:
+            st.info("Saved Successfully!")
+
+            del st.session_state["calculated_1rm"]
 
 
 st.divider()
@@ -44,7 +56,7 @@ max_reps = st.number_input("Maximum Target Reps",
 
 has_small_plates = st.checkbox("I have 1.25lb plates")
 
-if st.button("Calculate"):
+if st.button("Optimize"):
 
     optimizer_url = f"http://127.0.0.1:8000/calculate-optimal-set?weight={weight}&reps={reps}&min_reps={min_reps}&max_reps={max_reps}&has_small_plates={has_small_plates}"
 

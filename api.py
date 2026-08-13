@@ -11,9 +11,13 @@ def read_root():
 
 
 @app.get("/calculate-1rm")
-def get_one_rep_max(exercise: str, weight: float, reps: int):
+def get_one_rep_max(weight: float, reps: int):
     one_rep_max = calculate_one_rep_max(weight, reps)
+    return {"one_rep_max": one_rep_max}
 
+
+@app.get("/save-workout")
+def save_workout(exercise: str, weight: float, reps: int, one_rep_max: float):
     connection = sqlite3.connect("workouts.db")
     cursor = connection.cursor()
 
@@ -28,9 +32,6 @@ def get_one_rep_max(exercise: str, weight: float, reps: int):
     connection.close()
 
     return {
-        "weight_lifted": weight,
-        "repetitions": reps,
-        "one_rep_max": one_rep_max,
         "status": "Saved Successfully"
     }
 
