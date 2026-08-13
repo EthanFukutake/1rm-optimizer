@@ -9,6 +9,7 @@ def create_database():
     create_table = """
     CREATE TABLE IF NOT EXISTS workout_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        exercise TEXT NOT NULL,
         weight REAL NOT NULL,
         reps INTEGER NOT NULL,
         one_rep_max REAL NOT NULL,

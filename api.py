@@ -11,18 +11,18 @@ def read_root():
 
 
 @app.get("/calculate-1rm")
-def get_one_rep_max(weight: float, reps: int):
+def get_one_rep_max(exercise: str, weight: float, reps: int):
     one_rep_max = calculate_one_rep_max(weight, reps)
 
     connection = sqlite3.connect("workouts.db")
     cursor = connection.cursor()
 
     insert = """
-    INSERT INTO workout_history (weight, reps, one_rep_max)
-    VALUES (?, ?, ?)
+    INSERT INTO workout_history (exercise, weight, reps, one_rep_max)
+    VALUES (?, ?, ?, ?)
     """
 
-    cursor.execute(insert, (weight, reps, one_rep_max))
+    cursor.execute(insert, (exercise, weight, reps, one_rep_max))
 
     connection.commit()
     connection.close()
@@ -52,7 +52,7 @@ def get_workout_history():
     cursor = connection.cursor()
 
     select = """
-    SELECT id, weight, reps, one_rep_max, date_time
+    SELECT exercise, weight, reps, one_rep_max, date_time
     FROM workout_history
     ORDER BY date_time DESC
     """
@@ -66,7 +66,7 @@ def get_workout_history():
     history_table = []
     for row in rows:
         history_table.append({
-            "id": row[0],
+            "exercise": row[0],
             "weight": row[1],
             "reps": row[2],
             "one_rep_max": row[3],
